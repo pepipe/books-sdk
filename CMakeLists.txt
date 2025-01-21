@@ -20,8 +20,7 @@ message(STATUS "JNI libraries: ${JNI_LIBRARIES}")
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Define the BooksSDK library
-# add_library(BooksSDK SHARED ${SOURCES})
-add_executable(BooksSDK "main.cpp" ${SOURCES})
+add_library(BooksSDK SHARED ${SOURCES})
 
 # Add include directories after the target is defined
 target_include_directories(BooksSDK PUBLIC ${CMAKE_SOURCE_DIR}/include)
