@@ -11,12 +11,11 @@ public:
     void FetchBooks(const std::string &query, int startIndex, int maxResults,
                     std::function<void(std::vector<Book>, std::string)> callback) override;
 
-    bool IsFavorite(const std::string &bookId) const;
+    [[nodiscard]] bool IsFavorite(const std::string &bookId) const;
     [[nodiscard]] std::vector<Book> GetFavoriteBooks() const override;
     void AddToFavorites(Book& book) override;
 
 private:
-    static std::string UrlEncode(const std::string &url);
     static std::string PerformRequest(const std::string &url);
 
     std::string _baseUrl = "https://www.googleapis.com/books/v1/volumes";

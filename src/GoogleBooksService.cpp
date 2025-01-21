@@ -1,4 +1,4 @@
-#include "../include/GoogleBooksService.h"
+#include "GoogleBooksService.h"
 #include <../external/include/curl/curl.h>
 
 // Helper function to write cURL response to a string
@@ -64,27 +64,6 @@ std::vector<Book> GoogleBooksService::GetFavoriteBooks() const
         favoriteBooks.push_back(book);
     }
     return favoriteBooks;
-}
-
-std::string GoogleBooksService::UrlEncode(const std::string &url)
-{
-    std::ostringstream escaped;
-    escaped.fill('0');
-    escaped << std::hex;
-
-    for (const char c: url)
-    {
-        // Encode only non-alphanumeric characters or reserved URL characters
-        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
-        {
-            escaped << c;
-        } else
-        {
-            escaped << '%' << std::setw(2) << std::uppercase << static_cast<int>(static_cast<unsigned char>(c));
-        }
-    }
-
-    return escaped.str();
 }
 
 std::string GoogleBooksService::PerformRequest(const std::string &url)

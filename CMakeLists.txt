@@ -41,3 +41,20 @@ add_custom_command(TARGET BooksSDK POST_BUILD
         ${EXTERNAL_BIN_DIR} ${TARGET_OUTPUT_DIR}
         COMMENT "Copying external DLLs from ${EXTERNAL_BIN_DIR} to ${TARGET_OUTPUT_DIR}"
 )
+
+# Enable testing
+enable_testing()
+
+# Add test sources
+file(GLOB TEST_SOURCES "tests/*.cpp")
+
+# Create a test executable
+add_executable(BooksSDKTests ${TEST_SOURCES})
+
+# Link the test executable to GoogleTest
+target_link_libraries(BooksSDKTests
+        PRIVATE gtest gtest_main
+)
+
+# Add the test executable to CTest
+add_test(NAME BooksSDKTests COMMAND BooksSDKTests)
