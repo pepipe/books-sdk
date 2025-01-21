@@ -13,6 +13,15 @@ include_directories(${CMAKE_SOURCE_DIR}/external/include)
 # Link external libraries
 link_directories(${CMAKE_SOURCE_DIR}/external/lib)
 
+# Fetch GoogleTest from the official repository
+include(FetchContent)
+FetchContent_Declare(
+        gtest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.15.2
+)
+FetchContent_MakeAvailable(gtest)
+
 # Add source files
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(BooksSDK "main.cpp" ${SOURCES})

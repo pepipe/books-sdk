@@ -12,7 +12,8 @@ size_t WriteCallback(void *contents, const size_t size, const size_t nmemb, std:
 void GoogleBooksService::FetchBooks(const std::string &query, const int startIndex, const int maxResults,
                                     const std::function<void(std::vector<Book>, std::string)> callback)
 {
-    const std::string url = _baseUrl + "?q=" + query + "&maxResults=" + std::to_string(maxResults) +
+    const std::string encodedQuery = UrlEncode(query);
+    const std::string url = _baseUrl + "?q=" + encodedQuery + "&maxResults=" + std::to_string(maxResults) +
                             "&startIndex=" + std::to_string(startIndex);
 
     try
@@ -63,6 +64,27 @@ std::vector<Book> GoogleBooksService::GetFavoriteBooks() const
         favoriteBooks.push_back(book);
     }
     return favoriteBooks;
+}
+
+std::string GoogleBooksService::UrlEncode(const std::string &url)
+{
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for (const char c: url)
+    {
+        // Encode only non-alphanumeric characters or reserved URL characters
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+        {
+            escaped << c;
+        } else
+        {
+            escaped << '%' << std::setw(2) << std::uppercase << static_cast<int>(static_cast<unsigned char>(c));
+        }
+    }
+
+    return escaped.str();
 }
 
 std::string GoogleBooksService::PerformRequest(const std::string &url)

@@ -16,6 +16,7 @@ public:
     void AddToFavorites(Book& book) override;
 
 private:
+    static std::string UrlEncode(const std::string &url);
     static std::string PerformRequest(const std::string &url);
 
     std::string _baseUrl = "https://www.googleapis.com/books/v1/volumes";
