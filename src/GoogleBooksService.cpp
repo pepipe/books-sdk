@@ -10,7 +10,7 @@ size_t WriteCallback(void *contents, const size_t size, const size_t nmemb, std:
 }
 
 void GoogleBooksService::FetchBooks(const std::string &query, const int startIndex, const int maxResults,
-                                    const std::function<void(std::vector<Book>, std::string)> callback)
+    const FetchBooksCallback callback)
 {
     const std::string encodedQuery = UrlEncode(query);
     const std::string url = _baseUrl + "?q=" + encodedQuery + "&maxResults=" + std::to_string(maxResults) +
@@ -46,20 +46,56 @@ void GoogleBooksService::FetchBooks(const std::string &query, const int startInd
     }
 }
 
-void GoogleBooksService::AddToFavorites(Book &book)
+void GoogleBooksService::FetchBooks(const std::string &query, const int startIndex, const int maxResults,
+    FetchBooksJSONCallback callback)
 {
-    _favorites.emplace(book.GetId(), book);
+    const std::string encodedQuery = UrlEncode(query);
+    const std::string url = _baseUrl + "?q=" + encodedQuery + "&maxResults=" + std::to_string(maxResults) +
+                            "&startIndex=" + std::to_string(startIndex);
+
+    try
+    {
+        std::string response = PerformRequest(url);
+
+        auto jsonResponse = nlohmann::json::parse(response);
+        std::vector<Book> books;
+
+        callback(jsonResponse, "OK");
+    } catch (const std::exception &ex)
+    {
+        callback({}, ex.what());
+    }
+}
+
+void GoogleBooksService::AddToFavorites(std::string bookId, std::string bookJson)
+{
+    _favorites.emplace(bookId, bookJson);
+}
+
+void GoogleBooksService::AddToFavoritesBook(Book &book)
+{
+    _favoritesBook.emplace(book.GetId(), book);
 }
 
 bool GoogleBooksService::IsFavorite(const std::string &bookId) const
 {
-    return _favorites.find(bookId) != _favorites.end();
+    return _favoritesBook.find(bookId) != _favoritesBook.end();
 }
 
-std::vector<Book> GoogleBooksService::GetFavoriteBooks() const
+std::vector<std::string> GoogleBooksService::GetFavoriteBooks() const
+{
+    std::vector<std::string> favoriteBooks;
+    for (const auto &[id, book]: _favorites)
+    {
+        favoriteBooks.push_back(book);
+    }
+    return favoriteBooks;
+}
+
+std::vector<Book> GoogleBooksService::GetFavoriteBooksObjects() const
 {
     std::vector<Book> favoriteBooks;
-    for (const auto &[id, book]: _favorites)
+    for (const auto &[id, book]: _favoritesBook)
     {
         favoriteBooks.push_back(book);
     }
