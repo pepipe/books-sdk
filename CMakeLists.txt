@@ -24,7 +24,8 @@ FetchContent_MakeAvailable(gtest)
 
 # Add source files
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_executable(BooksSDK "main.cpp" ${SOURCES})
+#add_executable(BooksSDK "main.cpp" ${SOURCES})
+add_library(BooksSDK SHARED ${SOURCES})
 
 # Link libcurl
 target_link_libraries(BooksSDK curl)
