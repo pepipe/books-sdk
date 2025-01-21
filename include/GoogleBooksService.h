@@ -1,7 +1,6 @@
 #pragma once
 
 #include "IBookService.h"
-#include <../external/include/nlohmann/json.hpp>
 #include <vector>
 #include <map>
 
