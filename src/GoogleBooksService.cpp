@@ -1,4 +1,6 @@
 #include "GoogleBooksService.h"
+
+#include <iostream>
 #include <../external/include/curl/curl.h>
 
 // Helper function to write cURL response to a string
@@ -22,7 +24,9 @@ void GoogleBooksService::FetchBooks(const std::string &query, const int startInd
         callback(response, 200, "OK");
     } catch (const std::exception &ex)
     {
-        callback({}, 500, ex.what());
+        std::cerr << "Error performing request: " << ex.what() << std::endl;
+
+        callback({}, 500, "Internal Server Error");
     }
 }
 
