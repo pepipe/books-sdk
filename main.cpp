@@ -1,19 +1,16 @@
-#include <Book.h>
 #include <GoogleBooksService.h>
 #include <iostream>
 #include <vector>
 
-void HandleBooks(const std::vector<Book> &books, const std::string &status)
+void HandleBooks(const std::string &books, const int statusCode, const std::string &status)
 {
-    if (status == "OK")
+    if (statusCode == 200)
     {
         // Check if the operation succeeded
         std::cout << "Fetched books:\n";
-        for (const auto &book: books)
-        {
-            std::cout << "Title: " << book.GetTitle() << ", Author: " << book.GetAuthor() << "\n";
-        }
-    } else
+        std::cout << books << "\n";
+    }
+    else
     {
         // Handle an error
         std::cerr << "Error: " << status << "\n";
@@ -23,7 +20,6 @@ void HandleBooks(const std::vector<Book> &books, const std::string &status)
 
 int main()
 {
-    std::vector<Book> books;
     GoogleBooksService service;
-    service.FetchBooks("Harry Potter", 0, 20, HandleBooks);
+    service.FetchBooks("Harry Potter", 1, 1, HandleBooks);
 }

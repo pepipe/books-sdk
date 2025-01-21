@@ -8,19 +8,15 @@
 class GoogleBooksService final : public IBookService
 {
 public:
-    void FetchBooks(const std::string &query, int startIndex, int maxResults, FetchBooksCallback callback) override;
     void FetchBooks(const std::string &query, int startIndex, int maxResults, FetchBooksJSONCallback callback) override;
 
     [[nodiscard]] bool IsFavorite(const std::string &bookId) const override;
     [[nodiscard]] std::vector<std::string> GetFavoriteBooks() const override;
-    [[nodiscard]] std::vector<Book> GetFavoriteBooksObjects() const override;
-    void AddToFavorites(std::string bookId, std::string bookJson) override;
-    void AddToFavoritesBook(Book& book) override;
+    void AddToFavorites(const std::string& bookId, std::string bookJson) override;
 
 private:
     static std::string PerformRequest(const std::string &url);
 
     std::string _baseUrl = "https://www.googleapis.com/books/v1/volumes";
     std::map<std::string, std::string> _favorites;
-    std::map<std::string, Book> _favoritesBook;
 };

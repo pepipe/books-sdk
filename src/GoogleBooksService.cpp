@@ -10,7 +10,7 @@ size_t WriteCallback(void *contents, const size_t size, const size_t nmemb, std:
 }
 
 void GoogleBooksService::FetchBooks(const std::string &query, const int startIndex, const int maxResults,
-    const FetchBooksCallback callback)
+    const FetchBooksJSONCallback callback)
 {
     const std::string encodedQuery = UrlEncode(query);
     const std::string url = _baseUrl + "?q=" + encodedQuery + "&maxResults=" + std::to_string(maxResults) +
@@ -18,68 +18,22 @@ void GoogleBooksService::FetchBooks(const std::string &query, const int startInd
 
     try
     {
-        std::string response = PerformRequest(url);
-
-        auto jsonResponse = nlohmann::json::parse(response);
-        std::vector<Book> books;
-
-        for (const auto &item: jsonResponse["items"])
-        {
-            std::string id = item["id"];
-            std::string title = item["volumeInfo"]["title"];
-            std::string author = item["volumeInfo"].contains("authors") ? item["volumeInfo"]["authors"][0] : "Unknown";
-            std::string description = item["volumeInfo"].contains("description")
-                                          ? item["volumeInfo"]["description"]
-                                          : "No description available.";
-            std::string thumbnail = item["volumeInfo"].contains("imageLinks")
-                                        ? item["volumeInfo"]["imageLinks"]["thumbnail"]
-                                        : "";
-            std::string buyLink = item["saleInfo"].contains("buyLink") ? item["saleInfo"]["buyLink"] : "";
-
-            books.emplace_back(id, title, author, description, thumbnail, buyLink);
-        }
-
-        callback(books, "OK");
+        const std::string response = PerformRequest(url);
+        callback(response, 200, "OK");
     } catch (const std::exception &ex)
     {
-        callback({}, ex.what());
+        callback({}, 500, ex.what());
     }
 }
 
-void GoogleBooksService::FetchBooks(const std::string &query, const int startIndex, const int maxResults,
-    FetchBooksJSONCallback callback)
+void GoogleBooksService::AddToFavorites(const std::string& bookId, std::string bookJson)
 {
-    const std::string encodedQuery = UrlEncode(query);
-    const std::string url = _baseUrl + "?q=" + encodedQuery + "&maxResults=" + std::to_string(maxResults) +
-                            "&startIndex=" + std::to_string(startIndex);
-
-    try
-    {
-        std::string response = PerformRequest(url);
-
-        auto jsonResponse = nlohmann::json::parse(response);
-        std::vector<Book> books;
-
-        callback(jsonResponse, "OK");
-    } catch (const std::exception &ex)
-    {
-        callback({}, ex.what());
-    }
+    _favorites.emplace(bookId, std::move(bookJson));
 }
 
-void GoogleBooksService::AddToFavorites(std::string bookId, std::string bookJson)
+bool GoogleBooksService::IsFavorite(const std::string& bookId) const
 {
-    _favorites.emplace(bookId, bookJson);
-}
-
-void GoogleBooksService::AddToFavoritesBook(Book &book)
-{
-    _favoritesBook.emplace(book.GetId(), book);
-}
-
-bool GoogleBooksService::IsFavorite(const std::string &bookId) const
-{
-    return _favoritesBook.find(bookId) != _favoritesBook.end();
+    return _favorites.find(bookId) != _favorites.end();
 }
 
 std::vector<std::string> GoogleBooksService::GetFavoriteBooks() const
@@ -92,22 +46,13 @@ std::vector<std::string> GoogleBooksService::GetFavoriteBooks() const
     return favoriteBooks;
 }
 
-std::vector<Book> GoogleBooksService::GetFavoriteBooksObjects() const
-{
-    std::vector<Book> favoriteBooks;
-    for (const auto &[id, book]: _favoritesBook)
-    {
-        favoriteBooks.push_back(book);
-    }
-    return favoriteBooks;
-}
-
 std::string GoogleBooksService::PerformRequest(const std::string &url)
 {
     std::string response;
 
     if (CURL *curl = curl_easy_init())
     {
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
