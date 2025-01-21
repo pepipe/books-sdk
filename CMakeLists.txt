@@ -15,10 +15,7 @@ link_directories(${CMAKE_SOURCE_DIR}/external/lib)
 
 # Add source files
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_executable(BooksSDK "main.cpp" ${SOURCES}
-        include/IBookService.h
-        GoogleBooksService.cpp
-        GoogleBooksService.h)
+add_executable(BooksSDK "main.cpp" ${SOURCES})
 
 # Link libcurl
 target_link_libraries(BooksSDK curl)

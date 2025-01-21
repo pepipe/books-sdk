@@ -1,5 +1,5 @@
-#include "GoogleBooksService.h"
-#include <curl/curl.h>
+#include "../include/GoogleBooksService.h"
+#include <../external/include/curl/curl.h>
 
 // Helper function to write cURL response to a string
 size_t WriteCallback(void *contents, const size_t size, const size_t nmemb, std::string *s)
@@ -13,7 +13,7 @@ void GoogleBooksService::FetchBooks(const std::string &query, const int startInd
                                     const std::function<void(std::vector<Book>, std::string)> callback)
 {
     const std::string url = _baseUrl + "?q=" + query + "&maxResults=" + std::to_string(maxResults) +
-                      "&startIndex=" + std::to_string(startIndex);
+                            "&startIndex=" + std::to_string(startIndex);
 
     try
     {
@@ -45,7 +45,7 @@ void GoogleBooksService::FetchBooks(const std::string &query, const int startInd
     }
 }
 
-void GoogleBooksService::AddToFavorites(Book& book)
+void GoogleBooksService::AddToFavorites(Book &book)
 {
     _favorites.emplace(book.GetId(), book);
 }
