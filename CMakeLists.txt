@@ -20,7 +20,24 @@ message(STATUS "JNI libraries: ${JNI_LIBRARIES}")
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Define the BooksSDK library
-add_library(BooksSDK SHARED ${SOURCES})
+# add_library(BooksSDK SHARED ${SOURCES})
+
+# Define the BooksSDK as executable
+add_executable(BooksSDK "main.cpp" ${SOURCES})
+
+# If executable, then need to copy files
+# Define the external/bin directory
+set(EXTERNAL_BIN_DIR ${CMAKE_SOURCE_DIR}/external/bin)
+
+# Define the target output directory (build directory)
+set(TARGET_OUTPUT_DIR ${CMAKE_BINARY_DIR})
+
+# Add a custom post-build command to copy files
+add_custom_command(TARGET BooksSDK POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${EXTERNAL_BIN_DIR} ${TARGET_OUTPUT_DIR}
+        COMMENT "Copying external DLLs from ${EXTERNAL_BIN_DIR} to ${TARGET_OUTPUT_DIR}"
+)
 
 # Add include directories after the target is defined
 target_include_directories(BooksSDK PUBLIC ${CMAKE_SOURCE_DIR}/include)
@@ -49,7 +66,9 @@ enable_testing()
 
 file(GLOB TEST_SOURCES "tests/*.cpp")
 add_executable(BooksSDKTests ${TEST_SOURCES})
-target_link_libraries(BooksSDKTests PRIVATE BooksSDK gtest gtest_main)
+
+# when BooksSDK is a library
+# target_link_libraries(BooksSDKTests PRIVATE BooksSDK gtest gtest_main)
 
 # Enable CTest for testing
 add_test(NAME BooksSDKTests COMMAND BooksSDKTests)
