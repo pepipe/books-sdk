@@ -21,5 +21,5 @@ void HandleBooks(const std::string &books, const int statusCode, const std::stri
 int main()
 {
     GoogleBooksService service;
-    service.FetchBooks("Harry Potter", 1, 1, HandleBooks);
+    service.FetchBooks("iOS", 0, 5, HandleBooks);
 }
