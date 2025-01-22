@@ -35,11 +35,21 @@ target_link_libraries(BooksSDK PRIVATE
 message(STATUS "Zlib include: ${CMAKE_SOURCE_DIR}/external/include")
 message(STATUS "Zlib library: ${CMAKE_SOURCE_DIR}/external/lib/zlib.lib")
 
-# Tests (optional)
+# Tests
+# Fetch GoogleTest from the official repository
+include(FetchContent)
+FetchContent_Declare(
+        gtest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.15.2
+)
+FetchContent_MakeAvailable(gtest)
+
 enable_testing()
+
 file(GLOB TEST_SOURCES "tests/*.cpp")
 add_executable(BooksSDKTests ${TEST_SOURCES})
-#target_link_libraries(BooksSDKTests PRIVATE BooksSDK gtest gtest_main)
+target_link_libraries(BooksSDKTests PRIVATE BooksSDK gtest gtest_main)
 
 # Enable CTest for testing
 add_test(NAME BooksSDKTests COMMAND BooksSDKTests)
