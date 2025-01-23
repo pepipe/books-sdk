@@ -12,7 +12,7 @@ JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_
 (JNIEnv *env, jclass clazz, jobject callbackObj, jstring jQuery, jint startIndex, jint maxResults)
 {
     // Convert the Java string to a C++ string
-    const char *queryChars = env->GetStringUTFChars(jQuery, 0);
+    const char *queryChars = env->GetStringUTFChars(jQuery, nullptr);
     std::string queryStr(queryChars);
     env->ReleaseStringUTFChars(jQuery, queryChars);
 
@@ -42,7 +42,7 @@ JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_
             jstring encoding = env->NewStringUTF("UTF-8");
             jclass classString = env->FindClass("java/lang/String");
             jmethodID ctorString = env->GetMethodID(classString, "<init>", "([BLjava/lang/String;)V");
-            jstring resultJStr = static_cast<jstring>(env->NewObject(classString, ctorString, bytes, encoding));
+            jstring resultJStr = jstring(env->NewObject(classString, ctorString, bytes, encoding));
 
             // Invoke the callback method in Java
             localEnv->CallVoidMethod(callbackObj, callbackMethod, resultJStr);
