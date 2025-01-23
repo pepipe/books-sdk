@@ -1,6 +1,6 @@
-#include <GoogleBooksService.h>
 #include <iostream>
-#include <vector>
+
+#include "include/GoogleBooksService.h"
 
 void HandleBooks(const std::string &books, const int statusCode, const std::string &status)
 {
@@ -22,4 +22,6 @@ int main()
 {
     GoogleBooksService service;
     service.FetchBooks("iOS", 0, 5, HandleBooks);
+    bool b = service.IsFavorite("book1");
+    return 0;
 }

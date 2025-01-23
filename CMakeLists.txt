@@ -25,9 +25,11 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 option(BUILD_AS_LIB "Build project as a library" ON)
 if(BUILD_AS_LIB)
+    message("Library mode")
     # Define the BooksSDK library
     add_library(BooksSDK SHARED ${SOURCES})
 else ()
+    message("Executable mode")
     # Define the BooksSDK as executable
      add_executable(BooksSDK "main.cpp" ${SOURCES})
 
@@ -49,11 +51,10 @@ endif ()
 target_include_directories(BooksSDK PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 # Link external libraries (Zlib, libcurl, etc.)
-target_link_libraries(BooksSDK PRIVATE
+target_link_libraries(BooksSDK PUBLIC
         ${CMAKE_SOURCE_DIR}/external/lib/zlib.lib
         ${CMAKE_SOURCE_DIR}/external/lib/libcurl.lib
 )
 
 # Tests
-enable_testing()
 add_subdirectory(tests)

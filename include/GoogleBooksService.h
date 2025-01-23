@@ -15,7 +15,6 @@ public:
     void RemoveFromFavorites(const std::string& bookId) override;
 
 private:
-    static std::string PerformRequest(const std::string &url);
     void SaveFavorites() const;
     void LoadFavorites();
 
