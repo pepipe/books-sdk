@@ -9,25 +9,25 @@ static GoogleBooksService googleBooksService;
 extern "C"
 {
 JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_fetchBooksAsync
-(JNIEnv *env, jobject obj, jobject callbackObj, jstring jQuery, jint startIndex, jint maxResults)
+(JNIEnv *env, jclass clazz, jobject callbackObj, jstring jQuery, jint startIndex, jint maxResults)
 {
     // Convert the Java string to a C++ string
     const char *queryChars = env->GetStringUTFChars(jQuery, 0);
     std::string queryStr(queryChars);
     env->ReleaseStringUTFChars(jQuery, queryChars);
 
-    std::thread([env, obj, callbackObj, queryStr, startIndex, maxResults]()
+    std::thread([env, callbackObj, queryStr, startIndex, maxResults]()
     {
         JavaVM *jvm;
         env->GetJavaVM(&jvm);
         JNIEnv *localEnv;
         jvm->AttachCurrentThread(reinterpret_cast<void **>(&localEnv), nullptr);
 
+        std::string result;
         try
         {
-            std::string result = ""; // Holds the resulting JSON
             googleBooksService.FetchBooks(queryStr, startIndex, maxResults,
-                                          [&result](const std::string &json, int, const std::string &)
+                                          [&](const std::string &json, int, const std::string &)
                                           {
                                               result = json;
                                           });
