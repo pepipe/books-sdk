@@ -1,4 +1,4 @@
-# SDK Test
+# BOOKS SDK
 ## Test description - Book Store
 Book Store consists on showing a simple 2-column list of available books about mobile development.
 Using google’s api for books, the app should fetch and display the Thumbnail of a few books at a time and load more as the user scroll’s through the list.
@@ -24,5 +24,15 @@ It is very important show your experience with testing;
 
 Nice to have: Favorites in local storage using C++
 
-### Project Setup
-Using C++ 17 standard with CMake. Third party libraries were used: libcurl, nlohmann-json
+## Project Setup - Windows
+Using C++ 17 standard with CMake. Third party libraries were used: libcurl. 
+I used CLion as IDE with MinGW compiler
+1. Need to install CMake.
+2. Install Oracle OpenJDK23
+3. Then need to install JavaFX: https://gluonhq.com/products/javafx/
+4. Create a JAVA_HOME and JAVAFX_HOME env variables that point to the sdks.
+5. Add to PATH %JAVA_HOME%\bin and %JAVAFX_HOME%\lib
+
+This should be enough to build BooksSDK dll. 
+Inside <project root>/cmake-build-<debug|release> there's a dll file.
+Rename it to from libBooksSDK.dll to BooksSDK.dll. 
