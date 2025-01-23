@@ -16,6 +16,7 @@ public:
     [[nodiscard]] virtual bool IsFavorite(const std::string &bookId) const = 0;
     [[nodiscard]] virtual std::vector<std::string> GetFavoriteBooks() const = 0;
     virtual void AddToFavorites(const std::string& bookId, std::string bookJson) = 0;
+    virtual void RemoveFromFavorites(const std::string& bookId) = 0;
 
     /**
       * Encodes a URL string for safe transmission over HTTP.

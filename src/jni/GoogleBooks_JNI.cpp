@@ -6,7 +6,7 @@ static GoogleBooksService googleBooksService;
 
 extern "C"
 {
-JNIEXPORT jstring JNICALL Java_com_example_booksclient_GoogleBooksService_fetchBooks
+JNIEXPORT jstring JNICALL Java_com_example_booksclient_services_GoogleBooksService_fetchBooks
 (JNIEnv *env, jclass clazz, const jstring query,
  const jint startIndex, const jint maxResults)
 {
@@ -48,7 +48,7 @@ JNIEXPORT jstring JNICALL Java_com_example_booksclient_GoogleBooksService_fetchB
     return output;
 }
 
-JNIEXPORT void JNICALL Java_com_example_booksclient_GoogleBooksService_addToFavorites(JNIEnv *env, jclass clazz, const jstring bookId,
+JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_addToFavorites(JNIEnv *env, jclass clazz, const jstring bookId,
                                                     const jstring bookJson)
 {
     const char *cBookId = env->GetStringUTFChars(bookId, nullptr);
@@ -60,7 +60,7 @@ JNIEXPORT void JNICALL Java_com_example_booksclient_GoogleBooksService_addToFavo
     env->ReleaseStringUTFChars(bookJson, cBookJson);
 }
 
-JNIEXPORT jboolean JNICALL Java_com_example_booksclient_GoogleBooksService_isFavorite(JNIEnv *env, jclass clazz, const jstring bookId)
+JNIEXPORT jboolean JNICALL Java_com_example_booksclient_services_GoogleBooksService_isFavorite(JNIEnv *env, jclass clazz, const jstring bookId)
 {
     const char *cBookId = env->GetStringUTFChars(bookId, nullptr);
     bool isFav = googleBooksService.IsFavorite(cBookId);
@@ -68,7 +68,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_booksclient_GoogleBooksService_isFav
     return isFav ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jobject JNICALL Java_com_example_booksclient_GoogleBooksService_getFavoriteBooks(JNIEnv *env, jclass clazz)
+JNIEXPORT jobject JNICALL Java_com_example_booksclient_services_GoogleBooksService_getFavoriteBooks(JNIEnv *env, jclass clazz)
 {
     auto favorites = googleBooksService.GetFavoriteBooks();
     jclass arrayListClass = env->FindClass("java/util/ArrayList");

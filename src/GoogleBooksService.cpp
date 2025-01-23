@@ -30,11 +30,6 @@ void GoogleBooksService::FetchBooks(const std::string &query, const int startInd
     }
 }
 
-void GoogleBooksService::AddToFavorites(const std::string& bookId, std::string bookJson)
-{
-    _favorites.emplace(bookId, std::move(bookJson));
-}
-
 bool GoogleBooksService::IsFavorite(const std::string& bookId) const
 {
     return _favorites.find(bookId) != _favorites.end();
@@ -48,6 +43,16 @@ std::vector<std::string> GoogleBooksService::GetFavoriteBooks() const
         favoriteBooks.push_back(book);
     }
     return favoriteBooks;
+}
+
+void GoogleBooksService::AddToFavorites(const std::string& bookId, std::string bookJson)
+{
+    _favorites.emplace(bookId, std::move(bookJson));
+}
+
+void GoogleBooksService::RemoveFromFavorites(const std::string& bookId)
+{
+    _favorites.erase(bookId);
 }
 
 std::string GoogleBooksService::PerformRequest(const std::string &url)

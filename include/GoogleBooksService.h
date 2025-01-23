@@ -12,6 +12,7 @@ public:
     [[nodiscard]] bool IsFavorite(const std::string &bookId) const override;
     [[nodiscard]] std::vector<std::string> GetFavoriteBooks() const override;
     void AddToFavorites(const std::string& bookId, std::string bookJson) override;
+    void RemoveFromFavorites(const std::string& bookId) override;
 
 private:
     static std::string PerformRequest(const std::string &url);
