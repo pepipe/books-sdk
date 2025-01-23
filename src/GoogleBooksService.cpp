@@ -1,5 +1,6 @@
 #include "GoogleBooksService.h"
 
+#include <fstream>
 #include <iostream>
 #include <../external/include/curl/curl.h>
 
@@ -35,8 +36,12 @@ bool GoogleBooksService::IsFavorite(const std::string& bookId) const
     return _favorites.find(bookId) != _favorites.end();
 }
 
-std::vector<std::string> GoogleBooksService::GetFavoriteBooks() const
+std::vector<std::string> GoogleBooksService::GetFavoriteBooks()
 {
+    if (!_favoritesLoaded)
+    {
+        LoadFavorites();
+    }
     std::vector<std::string> favoriteBooks;
     for (const auto &[id, book]: _favorites)
     {
@@ -48,6 +53,7 @@ std::vector<std::string> GoogleBooksService::GetFavoriteBooks() const
 void GoogleBooksService::AddToFavorites(const std::string& bookId, std::string bookJson)
 {
     _favorites.emplace(bookId, std::move(bookJson));
+    SaveFavorites();
 }
 
 void GoogleBooksService::RemoveFromFavorites(const std::string& bookId)
@@ -77,4 +83,27 @@ std::string GoogleBooksService::PerformRequest(const std::string &url)
     }
 
     return response;
+}
+
+void GoogleBooksService::SaveFavorites() const
+{
+    if (std::ofstream file("favorites.txt"); file.is_open()) {
+        for (const auto& kv : _favorites) {
+            file << kv.first << "\n" << kv.second << "\n";
+        }
+        file.close();
+    }
+}
+
+void GoogleBooksService::LoadFavorites() {
+    if (std::ifstream file("favorites.txt"); file.is_open()) {
+        std::string key;
+        std::string value;
+        while (std::getline(file, key)) {
+            if (std::getline(file, value)) {
+                _favorites[key] = value;
+            }
+        }
+        file.close();
+    }
 }
