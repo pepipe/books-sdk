@@ -1,11 +1,60 @@
 #include <jni.h>
 #include <string>
+#include <thread>
+
 #include "GoogleBooksService.h"
 
 static GoogleBooksService googleBooksService;
 
 extern "C"
 {
+JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_fetchBooksAsync
+(JNIEnv *env, jobject obj, jobject callbackObj, jstring jQuery, jint startIndex, jint maxResults)
+{
+    // Convert the Java string to a C++ string
+    const char *queryChars = env->GetStringUTFChars(jQuery, 0);
+    std::string queryStr(queryChars);
+    env->ReleaseStringUTFChars(jQuery, queryChars);
+
+    std::thread([env, obj, callbackObj, queryStr, startIndex, maxResults]()
+    {
+        JavaVM *jvm;
+        env->GetJavaVM(&jvm);
+        JNIEnv *localEnv;
+        jvm->AttachCurrentThread(reinterpret_cast<void **>(&localEnv), nullptr);
+
+        try
+        {
+            std::string result = ""; // Holds the resulting JSON
+            googleBooksService.FetchBooks(queryStr, startIndex, maxResults,
+                                          [&result](const std::string &json, int, const std::string &)
+                                          {
+                                              result = json;
+                                          });
+
+            // Get Java class and method
+            jclass callbackClass = localEnv->GetObjectClass(callbackObj);
+            jmethodID callbackMethod = localEnv->GetMethodID(callbackClass, "onResult", "(Ljava/lang/String;)V");
+
+            // Create new UTF-16 java string from UTF-8 c++ string
+            jbyteArray bytes = env->NewByteArray(result.length());
+            env->SetByteArrayRegion(bytes, 0, result.length(), reinterpret_cast<const jbyte *>(result.c_str()));
+            jstring encoding = env->NewStringUTF("UTF-8");
+            jclass classString = env->FindClass("java/lang/String");
+            jmethodID ctorString = env->GetMethodID(classString, "<init>", "([BLjava/lang/String;)V");
+            jstring resultJStr = static_cast<jstring>(env->NewObject(classString, ctorString, bytes, encoding));
+
+            // Invoke the callback method in Java
+            localEnv->CallVoidMethod(callbackObj, callbackMethod, resultJStr);
+        } catch (const std::exception &e)
+        {
+            // Handle any error that occurred and convert it to Java exception if necessary
+        }
+
+        jvm->DetachCurrentThread(); // Detach when done
+    }).detach(); // Detach thread to avoid blocking
+}
+
 JNIEXPORT jstring JNICALL Java_com_example_booksclient_services_GoogleBooksService_fetchBooks
 (JNIEnv *env, jclass clazz, const jstring query,
  const jint startIndex, const jint maxResults)
@@ -14,7 +63,7 @@ JNIEXPORT jstring JNICALL Java_com_example_booksclient_services_GoogleBooksServi
     try
     {
         jboolean isCopy;
-        const char* utf8 = env->GetStringUTFChars(query, &isCopy);
+        const char *utf8 = env->GetStringUTFChars(query, &isCopy);
         std::string cQuery(utf8);
         env->ReleaseStringUTFChars(query, utf8);
 
@@ -27,15 +76,14 @@ JNIEXPORT jstring JNICALL Java_com_example_booksclient_services_GoogleBooksServi
                 result = json;
             }
         );
-    }
-    catch (const std::exception &e)
+    } catch (const std::exception &e)
     {
         return env->NewStringUTF(e.what());
     }
 
     // Create new UTF-16 java string from UTF-8 c++ string
     jbyteArray bytes = env->NewByteArray(result.length());
-    env->SetByteArrayRegion(bytes, 0, result.length(), reinterpret_cast<const jbyte*>(result.c_str()));
+    env->SetByteArrayRegion(bytes, 0, result.length(), reinterpret_cast<const jbyte *>(result.c_str()));
     jstring encoding = env->NewStringUTF("UTF-8");
     jclass classString = env->FindClass("java/lang/String");
     jmethodID ctorString = env->GetMethodID(classString, "<init>", "([BLjava/lang/String;)V");
@@ -48,8 +96,9 @@ JNIEXPORT jstring JNICALL Java_com_example_booksclient_services_GoogleBooksServi
     return output;
 }
 
-JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_addToFavorites(JNIEnv *env, jclass clazz, const jstring bookId,
-                                                    const jstring bookJson)
+JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_addToFavorites(
+    JNIEnv *env, jclass clazz, const jstring bookId,
+    const jstring bookJson)
 {
     const char *cBookId = env->GetStringUTFChars(bookId, nullptr);
     const char *cBookJson = env->GetStringUTFChars(bookJson, nullptr);
@@ -60,7 +109,8 @@ JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_
     env->ReleaseStringUTFChars(bookJson, cBookJson);
 }
 
-JNIEXPORT jboolean JNICALL Java_com_example_booksclient_services_GoogleBooksService_isFavorite(JNIEnv *env, jclass clazz, const jstring bookId)
+JNIEXPORT jboolean JNICALL Java_com_example_booksclient_services_GoogleBooksService_isFavorite(
+    JNIEnv *env, jclass clazz, const jstring bookId)
 {
     const char *cBookId = env->GetStringUTFChars(bookId, nullptr);
     bool isFav = googleBooksService.IsFavorite(cBookId);
@@ -68,7 +118,8 @@ JNIEXPORT jboolean JNICALL Java_com_example_booksclient_services_GoogleBooksServ
     return isFav ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jobject JNICALL Java_com_example_booksclient_services_GoogleBooksService_getFavoriteBooks(JNIEnv *env, jclass clazz)
+JNIEXPORT jobject JNICALL Java_com_example_booksclient_services_GoogleBooksService_getFavoriteBooks(
+    JNIEnv *env, jclass clazz)
 {
     auto favorites = googleBooksService.GetFavoriteBooks();
     jclass arrayListClass = env->FindClass("java/util/ArrayList");
