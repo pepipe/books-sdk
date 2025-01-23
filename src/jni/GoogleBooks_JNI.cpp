@@ -62,6 +62,16 @@ JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_
     env->ReleaseStringUTFChars(bookJson, cBookJson);
 }
 
+JNIEXPORT void JNICALL Java_com_example_booksclient_services_GoogleBooksService_removeFromFavorites(
+JNIEnv *env, jclass clazz, const jstring bookId)
+{
+    const char *cBookId = env->GetStringUTFChars(bookId, nullptr);
+
+    googleBooksService.RemoveFromFavorites(cBookId);
+
+    env->ReleaseStringUTFChars(bookId, cBookId);
+}
+
 JNIEXPORT jboolean JNICALL Java_com_example_booksclient_services_GoogleBooksService_isFavorite(
     JNIEnv *env, jclass clazz, const jstring bookId)
 {

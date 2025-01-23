@@ -59,6 +59,7 @@ void GoogleBooksService::AddToFavorites(const std::string& bookId, std::string b
 void GoogleBooksService::RemoveFromFavorites(const std::string& bookId)
 {
     _favorites.erase(bookId);
+    SaveFavorites();
 }
 
 std::string GoogleBooksService::PerformRequest(const std::string &url)
