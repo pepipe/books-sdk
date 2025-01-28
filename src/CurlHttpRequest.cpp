@@ -1,7 +1,7 @@
 #include "CurlHttpRequest.h"
 
 #include <stdexcept>
-#include <../external/include/curl/curl.h>
+#include <curl/curl.h>
 
 // Helper function to write cURL response to a string
 size_t WriteCallback(void *contents, const size_t size, const size_t nmemb, std::string *s)
