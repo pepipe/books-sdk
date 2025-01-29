@@ -1,16 +1,9 @@
 #include <condition_variable>
 #include <jni.h>
-#include <mutex>
 #include <string>
-#include <thread>
 
 #include "GoogleBooksService.h"
-
-#ifdef BUILD_FOR_ANDROID
-#include <android/log.h>
-#define LOG_TAG "NativeApi"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#endif
+#include "../AndroidLogging.h"
 
 static GoogleBooksService googleBooksService;
 
@@ -21,15 +14,11 @@ JNIEXPORT jstring JNICALL Java_com_example_booksclient_NativeApi_fetchBooks
  const jint startIndex, const jint maxResults)
 {
     std::string result;
-    bool done = false;  // Flag to signal when the callback completes
-    std::mutex mtx;
-    std::condition_variable cv;
-
     try
     {
         jboolean isCopy;
         const char *utf8 = env->GetStringUTFChars(query, &isCopy);
-#ifdef BUILD_FOR_ANDROID
+#ifdef ANDROID
         LOGI("Fetching books with query: %s, startIndex: %d, maxResults: %d", utf8, startIndex, maxResults);
 #endif
         std::string cQuery(utf8);
@@ -41,21 +30,12 @@ JNIEXPORT jstring JNICALL Java_com_example_booksclient_NativeApi_fetchBooks
             maxResults,
             [&](const std::string &json, int, const std::string &)
             {
-                std::lock_guard lock(mtx);
                 result = json;
-                done = true;
-#ifdef BUILD_FOR_ANDROID
+#ifdef ANDROID
                 LOGI("Fetched books: %s", result.c_str());
 #endif
-                cv.notify_one();
             }
         );
-
-        std::unique_lock lock(mtx);
-        cv.wait(lock, [&]()
-        {
-            return done;
-        });
     } catch (const std::exception &e)
     {
         return env->NewStringUTF(e.what());
@@ -90,7 +70,7 @@ JNIEXPORT void JNICALL Java_com_example_booksclient_NativeApi_addToFavorites(
 }
 
 JNIEXPORT void JNICALL Java_com_example_booksclient_NativeApi_removeFromFavorites(
-JNIEnv *env, jclass clazz, const jstring bookId)
+    JNIEnv *env, jclass clazz, const jstring bookId)
 {
     const char *cBookId = env->GetStringUTFChars(bookId, nullptr);
 
@@ -124,5 +104,11 @@ JNIEXPORT jobject JNICALL Java_com_example_booksclient_NativeApi_getFavoriteBook
         env->DeleteLocalRef(bookStr);
     }
     return arrayList;
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_example_booksclient_NativeApi_testNative(JNIEnv *env, jclass clazz)
+{
+    return env->NewStringUTF("Native test success!");
 }
 } // extern "C"

@@ -4,13 +4,17 @@
 #include <fstream>
 #include <iostream>
 
+#include "AndroidLogging.h"
+
 void GoogleBooksService::FetchBooks(const std::string &query, const int startIndex, const int maxResults,
                                     const FetchBooksJSONCallback callback)
 {
     const std::string encodedQuery = IBookService::UrlEncode(query);
     const std::string url = _baseUrl + "?q=" + encodedQuery + "&maxResults=" + std::to_string(maxResults) +
                             "&startIndex=" + std::to_string(startIndex);
-
+#ifdef ANDROID
+    LOGI("Fetching URL: %s", url.c_str());
+#endif
     try
     {
 #ifndef TESTING
@@ -21,7 +25,6 @@ void GoogleBooksService::FetchBooks(const std::string &query, const int startInd
     } catch (const std::exception &ex)
     {
         std::cerr << "Error performing request: " << ex.what() << std::endl;
-
         callback({}, 500, "Internal Server Error");
     }
 }
