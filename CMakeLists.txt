@@ -1,16 +1,29 @@
 cmake_minimum_required(VERSION 3.16)
 
-# Detect toolchain.
-include(my-toolchain.cmake)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif ()
+
+if(DEFINED ANDROID)
+    option(BUILD_FOR_ANDROID "Build project for Android" ON)
+else ()
+    option(BUILD_FOR_ANDROID "Build project for Android" OFF)
+endif ()
+
+if(DEFINED LIB)
+    option(BUILD_AS_LIB "Build project as a library" ON)
+else ()
+    option(BUILD_AS_LIB "Build project as a library" OFF)
+endif ()
+
+if(BUILD_FOR_ANDROID)
+    include(my-toolchain.cmake)
+endif ()
 
 project(BooksSDK)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
-endif()
 
 # Find Java and JNI
 find_package(Java REQUIRED COMPONENTS Development)
@@ -27,10 +40,7 @@ message(STATUS "JNI libraries: ${JNI_LIBRARIES}")
 # Add source files
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
-option(BUILD_FOR_ANDROID "Build project for Android" OFF)
-
-option(BUILD_AS_LIB "Build project as a library" ON)
-if(BUILD_AS_LIB)
+if (BUILD_AS_LIB)
     message("Library mode")
     # Define the BooksSDK library
     add_library(BooksSDK SHARED ${SOURCES})
@@ -39,7 +49,7 @@ else ()
     # Define the BooksSDK as executable
     add_executable(BooksSDK "main.cpp" ${SOURCES})
 
-    if(!BUILD_FOR_ANDROID)
+    if (NOT BUILD_FOR_ANDROID)
         # Define the external/bin directory
         set(EXTERNAL_BIN_DIR ${CMAKE_SOURCE_DIR}/external/windows/bin)
 
@@ -56,8 +66,9 @@ else ()
 endif ()
 
 # Add include directories after the target is defined
-if(!BUILD_FOR_ANDROID)
+if (NOT BUILD_FOR_ANDROID)
     message("Build for windows")
+
     target_include_directories(BooksSDK PUBLIC
             ${CMAKE_SOURCE_DIR}/include
             ${CMAKE_SOURCE_DIR}/external/windows/include)
@@ -80,6 +91,7 @@ else ()
 
     # Link external libraries (Zlib, libcurl, etc.)
     target_link_libraries(BooksSDK PUBLIC
+            log
             ${CMAKE_SOURCE_DIR}/external/android/lib/libz.a
             ${CMAKE_SOURCE_DIR}/external/android/lib/libcurl.a
             ${CMAKE_SOURCE_DIR}/external/android/lib/libssl.a
