@@ -13,7 +13,7 @@ public:
     virtual ~IBookService() = default;
 
     virtual void FetchBooks(const std::string &query, int startIndex, int maxResults, FetchBooksJSONCallback callback) = 0;
-    [[nodiscard]] virtual bool IsFavorite(const std::string &bookId) const = 0;
+    [[nodiscard]] virtual bool IsFavorite(const std::string &bookId) = 0;
     [[nodiscard]] virtual std::vector<std::string> GetFavoriteBooks() = 0;
     virtual void AddToFavorites(const std::string& bookId, std::string bookJson) = 0;
     virtual void RemoveFromFavorites(const std::string& bookId) = 0;

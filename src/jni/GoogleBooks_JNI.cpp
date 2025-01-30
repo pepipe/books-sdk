@@ -3,21 +3,20 @@
 #include <string>
 
 #include "GoogleBooksService.h"
-#include "../AndroidLogging.h"
+#include "../android/AndroidLogging.h"
 
 static GoogleBooksService googleBooksService;
 
 extern "C"
 {
-JNIEXPORT jstring JNICALL Java_com_example_booksclient_NativeApi_fetchBooks
-(JNIEnv *env, jclass clazz, const jstring query,
+JNIEXPORT jstring JNICALL Java_com_example_booksclient_NativeApi_fetchBooks(JNIEnv *env, jclass clazz, const jstring query,
  const jint startIndex, const jint maxResults)
 {
     std::string result;
     try
     {
         jboolean isCopy;
-        const char *utf8 = env->GetStringUTFChars(query, &isCopy);
+        const char* utf8 = env->GetStringUTFChars(query, &isCopy);
 #ifdef ANDROID
         LOGI("Fetching books with query: %s, startIndex: %d, maxResults: %d", utf8, startIndex, maxResults);
 #endif
@@ -56,40 +55,48 @@ JNIEXPORT jstring JNICALL Java_com_example_booksclient_NativeApi_fetchBooks
     return output;
 }
 
-JNIEXPORT void JNICALL Java_com_example_booksclient_NativeApi_addToFavorites(
-    JNIEnv *env, jclass clazz, const jstring bookId,
+JNIEXPORT void JNICALL Java_com_example_booksclient_NativeApi_addToFavorites(JNIEnv *env, jclass clazz, const jstring bookId,
     const jstring bookJson)
 {
-    const char *cBookId = env->GetStringUTFChars(bookId, nullptr);
-    const char *cBookJson = env->GetStringUTFChars(bookJson, nullptr);
+    const char* cBookId = env->GetStringUTFChars(bookId, nullptr);
+    const char* cBookJson = env->GetStringUTFChars(bookJson, nullptr);
 
     googleBooksService.AddToFavorites(cBookId, cBookJson);
 
     env->ReleaseStringUTFChars(bookId, cBookId);
     env->ReleaseStringUTFChars(bookJson, cBookJson);
+
+#ifdef ANDROID
+    LOGI("Add to favorites, BookId: %s", cBookId);
+#endif
 }
 
-JNIEXPORT void JNICALL Java_com_example_booksclient_NativeApi_removeFromFavorites(
-    JNIEnv *env, jclass clazz, const jstring bookId)
+JNIEXPORT void JNICALL Java_com_example_booksclient_NativeApi_removeFromFavorites(JNIEnv *env, jclass clazz, const jstring bookId)
 {
-    const char *cBookId = env->GetStringUTFChars(bookId, nullptr);
+    const char* cBookId = env->GetStringUTFChars(bookId, nullptr);
 
     googleBooksService.RemoveFromFavorites(cBookId);
 
     env->ReleaseStringUTFChars(bookId, cBookId);
+#ifdef ANDROID
+    LOGI("Removed from favorites, BookId: %s", cBookId);
+#endif
 }
 
-JNIEXPORT jboolean JNICALL Java_com_example_booksclient_NativeApi_isFavorite(
-    JNIEnv *env, jclass clazz, const jstring bookId)
+JNIEXPORT jboolean JNICALL Java_com_example_booksclient_NativeApi_isFavorite(JNIEnv *env, jclass clazz, const jstring bookId)
 {
-    const char *cBookId = env->GetStringUTFChars(bookId, nullptr);
-    bool isFav = googleBooksService.IsFavorite(cBookId);
+    const char* cBookId = env->GetStringUTFChars(bookId, nullptr);
+    const bool isFav = googleBooksService.IsFavorite(cBookId);
+
+#ifdef ANDROID
+    LOGI("If book favorite: %hhd | id: %s | filePath: %s", isFav, cBookId, googleBooksService.GetFavoritesFilePath().c_str());
+#endif
+
     env->ReleaseStringUTFChars(bookId, cBookId);
     return isFav ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jobject JNICALL Java_com_example_booksclient_NativeApi_getFavoriteBooks(
-    JNIEnv *env, jclass clazz)
+JNIEXPORT jobject JNICALL Java_com_example_booksclient_NativeApi_getFavoriteBooks(JNIEnv *env, jclass clazz)
 {
     auto favorites = googleBooksService.GetFavoriteBooks();
     jclass arrayListClass = env->FindClass("java/util/ArrayList");
@@ -106,8 +113,20 @@ JNIEXPORT jobject JNICALL Java_com_example_booksclient_NativeApi_getFavoriteBook
     return arrayList;
 }
 
-JNIEXPORT jstring JNICALL
-Java_com_example_booksclient_NativeApi_testNative(JNIEnv *env, jclass clazz)
+JNIEXPORT void JNICALL Java_com_example_booksclient_NativeApi_setFavoritesFilePath(JNIEnv *env, jclass clazz, const jstring favoritesFilePath)
+{
+    const char* path = env->GetStringUTFChars(favoritesFilePath, nullptr);
+    std::string favoritesPath(path);
+
+    googleBooksService.SetFavoritesFilePath(favoritesPath);
+
+    env->ReleaseStringUTFChars(favoritesFilePath, path);
+#ifdef ANDROID
+    LOGI("Set favorites path: %s", favoritesPath.c_str());
+#endif
+}
+
+JNIEXPORT jstring JNICALL Java_com_example_booksclient_NativeApi_testNative(JNIEnv *env, jclass clazz)
 {
     return env->NewStringUTF("Native test success!");
 }
