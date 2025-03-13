@@ -44,7 +44,7 @@ if (BUILD_AS_LIB)
     message("Library mode")
     # Define the BooksSDK library
     add_library(BooksSDK SHARED ${SOURCES})
-else ()
+else () # only for Windows platforms
     message("Executable mode")
     # Define the BooksSDK as executable
     add_executable(BooksSDK "main.cpp" ${SOURCES})

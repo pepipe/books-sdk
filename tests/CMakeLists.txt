@@ -16,10 +16,18 @@ set(APP_SOURCES
 )
 add_executable(BooksSDKTests ${TEST_SOURCES} ${APP_SOURCES})
 target_include_directories(BooksSDKTests PUBLIC ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(BooksSDKTests PRIVATE
-        ${CMAKE_SOURCE_DIR}/external/lib/zlib.lib
-        ${CMAKE_SOURCE_DIR}/external/lib/libcurl.lib
-)
+if (NOT BUILD_FOR_ANDROID)
+    target_link_libraries(BooksSDKTests PRIVATE
+            ${CMAKE_SOURCE_DIR}/external/windows/lib/zlib.lib
+            ${CMAKE_SOURCE_DIR}/external/windows/lib/libcurl.lib
+    )
+else ()
+    target_link_libraries(BooksSDKTests PRIVATE
+            ${CMAKE_SOURCE_DIR}/external/android/lib/libz.a
+            ${CMAKE_SOURCE_DIR}/external/android/lib/libcurl.a
+            ${CMAKE_SOURCE_DIR}/external/android/lib/libssl.a
+    )
+endif ()
 
 if(BUILD_AS_LIB)
 target_link_libraries(BooksSDKTests PRIVATE BooksSDK gtest gtest_main)

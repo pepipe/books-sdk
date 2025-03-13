@@ -24,7 +24,7 @@ It is very important show your experience with testing;
 
 Nice to have: Favorites in local storage using C++
 
-## Project Setup - Windows
+## Project Setup build for Windows (JavaFX) - Create a DLL
 Using C++ 17 standard with CMake. Third party libraries were used: libcurl. 
 I used CLion as IDE with MinGW compiler
 1. Need to install CMake.
@@ -36,3 +36,24 @@ I used CLion as IDE with MinGW compiler
 This should be enough to build BooksSDK dll. 
 Inside <project root>/cmake-build-<debug|release> there's a dll file.
 Rename it to from libBooksSDK.dll to BooksSDK.dll. 
+
+## Project setup build for Android - Windows
+1. Install Android NDK, version used was 28.0.12916984
+2. In CLion configure Toolchain to use
+   1. C Compiler: < ndk >/toolchains/llvm/prebuilt/windows-x86_64/bin/aarch64-linux-android35-clang
+   2. C++ Compiler: < ndk >/toolchains/llvm/prebuild/windows-x86_64/bin/aarch64-linux-android35-clang++
+3. Configure CMake to use the Android toolchain
+   1. Set toolchain to the one configured in 2.
+   2. Add this to CMake options (setup to build as lib and android): -DLIB=1 -DANDROID=1
+   3. If debug add this to the beginning of CMake options: -DCMAKE_BUILD_TYPE=Debug
+
+## Project setup build for Android - MacOs
+1. Install Android NDK (version 28.0.1291694). Easiest ways is to install Android Studio. 
+2. In CLion configure Toolchain to use
+   1. C Compiler: /Users/< macos user >/Library/Android/sdk/ndk/28.0.12916984/toolchains/llvm/prebuilt/darwin-x86_64/clang
+   2. C++ Compiler: /Users/< macos user >/Library/Android/sdk/ndk/28.0.12916984/toolchains/llvm/prebuilt/darwin-x86_64/clang++
+3. Configure CMake to use the Android toolchain
+   1. Set toolchain to the one configured in 2.
+   2. Add this to CMake options (setup to build as lib and android): -DLIB=1 -DANDROID=1 -DCMAKE_TOOLCHAIN_FILE=/Users/< macos user >/Library/Android/sdk/ndk/28.0.12916984/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a
+   3. If debug add this to the beginning of CMake options: -DCMAKE_BUILD_TYPE=Debug
+
